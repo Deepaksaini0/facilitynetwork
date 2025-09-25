@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-//require __DIR__ . '/vendor/autoload.php';
+//require __DIR__ . '/autoload.php';
 
 \Stripe\Stripe::setApiKey('sk_test_51Re0MgIDzdAJW4x4OXQMUDXTFEoLMAgV1SPPwqP4VLuqEAoF6Kh52Bi0gkOQYtREEar4kEMxv5GXiS3JmqVAHsek003BblxRmL');
 
