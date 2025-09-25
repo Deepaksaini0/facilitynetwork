@@ -1,5 +1,5 @@
 <?php
-
+echo "<h1>Hello, Heroku!</h1>";
 
 // Allow your Webflow domain to access
 header("Access-Control-Allow-Origin: https://facility-network-v1.webflow.io");
