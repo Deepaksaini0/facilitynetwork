@@ -1,25 +1,10 @@
 
 <?php
 
-// Allow your live site
-header("Access-Control-Allow-Origin: https://www.facilitynetwork.com");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
-
-// (optional) if you still need Webflow staging domain also:
-$allowedOrigins = [
-    "https://www.facilitynetwork.com",
-    "https://facility-network-v1.webflow.io"
-];
-
-if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowedOrigins)) {
-    header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
-}
-
 echo "<h1>Hello, Heroku!</h1>";
 
 // Allow your Webflow domain to access
-header("Access-Control-Allow-Origin: https://facility-network-v1.webflow.io");
+header("Access-Control-Allow-Origin: https://www.facilitynetwork.com/");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
