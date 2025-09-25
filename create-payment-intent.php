@@ -30,8 +30,6 @@ if (!$amount || $amount <= 0) {
 }
 
 try {
-  
-
     // Create a PaymentIntent with manual capture (authorize only)
     $paymentIntent = \Stripe\PaymentIntent::create([
         'amount' => $amount, // Dynamic amount in cents
@@ -48,23 +46,20 @@ try {
             'Trade Type'      => $input['tradeType'] ?? '',
             'Issue'           => $input['issueDescription'] ?? '',
             'Card Name'       => $input['cardName'] ?? '',
-            'Billing Postal'  => $input['billingPostal'] ?? ''
+            'Billing Postal'  => $input['billingPostal'] ?? '',
+            'Hotline File'    => $input['hotlinefile'] ?? ''
         ]
     ]);
 
     // Optional: Send email notification
-    
-   /* $to = "kamesh.sharma@imarkinfotech.com";
-    $subject = "New Hotline Hold - " . $input['firstName'] . " " . $input['lastName'];
-    $subject = "Emergency Service Request – Please Call Our Hotline;
-    $message = "New hotline request with $" . $input['amount'] . " hold:\n\n";
+    $to = "deepak@imarkinfotech.com";
+    $subject = "Emergency Service Request – " . ($input['firstName'] ?? '') . " " . ($input['lastName'] ?? '');
+    $message = "New hotline request with $" . ($input['holdAmount'] ?? 0) . " hold:\n\n";
     foreach ($input as $key => $val) {
         $message .= ucfirst($key) . ": " . $val . "\n";
     }
-     'Hotlinefile'     => $input['hotlinefile'] ?? ''
     $headers = "From: no-reply@clientsdevsite.com\r\n";
-    mail($to, $subject, $message, $headers);*/
-    
+    mail($to, $subject, $message, $headers);
 
     echo json_encode(['clientSecret' => $paymentIntent->client_secret]);
 
@@ -72,4 +67,3 @@ try {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }
-
