@@ -1,5 +1,6 @@
 <?php
 use Mailgun\Mailgun;
+
 // -------------------------------------------
 // CORS Handling
 // -------------------------------------------
@@ -38,10 +39,10 @@ if (!$amount || $amount <= 0) {
     exit();
 }
 
-// -------------------------------------------
-// Stripe PaymentIntent
-// -------------------------------------------
 try {
+    // -------------------------------------------
+    // Stripe PaymentIntent
+    // -------------------------------------------
     $paymentIntent = \Stripe\PaymentIntent::create([
         'amount' => $amount,
         'currency' => 'cad',
@@ -56,33 +57,55 @@ try {
             'Site Address'    => $input['siteAddress'] ?? '',
             'Trade Type'      => $input['tradeType'] ?? '',
             'Issue'           => $input['issueDescription'] ?? '',
-            'Card Name'       => $input['cardName'] ?? '',
-            'Billing Postal'  => $input['billingPostal'] ?? '',
-            'Hotline File'    => $input['hotlinefile'] ?? ''
         ]
     ]);
 
     // -------------------------------------------
-    // Send Email via Mailgun
+    // Mailgun setup
     // -------------------------------------------
-    
-
     $mgClient = Mailgun::create(getenv('MAILGUN_API_KEY'));
     $domain   = getenv('MAILGUN_DOMAIN');
 
-    $to = "deepak@imarkinfotech.com";
-    $subject = "Emergency Service Request – " . ($input['firstName'] ?? '') . " " . ($input['lastName'] ?? '');
-    $messageBody = "New hotline request with $" . ($input['holdAmount'] ?? 0) . " hold:\n\n";
+    // --- Admin email ---
+    $adminTo = "deepak@imarkinfotech.com";
+    $adminSubject = "New Emergency Service Request – " . ($input['firstName'] ?? '') . " " . ($input['lastName'] ?? '');
+    $adminMessage = "New hotline request with $" . ($input['holdAmount'] ?? 0) . " hold:\n\n";
     foreach ($input as $key => $val) {
-        $messageBody .= ucfirst($key) . ": " . $val . "\n";
+        $adminMessage .= ucfirst($key) . ": " . $val . "\n";
     }
 
     $mgClient->messages()->send($domain, [
         'from'    => 'no-reply@deepak.com',
-        'to'      => $to,
-        'subject' => $subject,
-        'text'    => $messageBody
+        'to'      => $adminTo,
+        'subject' => $adminSubject,
+        'text'    => $adminMessage
     ]);
+
+    // --- User confirmation email ---
+    $userTo = $input['email'] ?? null;
+    if ($userTo) {
+        $userSubject = "Your Emergency Service Request Received";
+        
+        // Simple plain text message
+        $userMessage = "Hi " . ($input['firstName'] ?? '') . ",\n\n";
+        $userMessage .= "We have received your emergency service request with the following details:\n\n";
+        $userMessage .= "Name: " . ($input['firstName'] ?? '') . " " . ($input['lastName'] ?? '') . "\n";
+        $userMessage .= "Company: " . ($input['companyName'] ?? '') . "\n";
+        $userMessage .= "Email: " . ($input['email'] ?? '') . "\n";
+        $userMessage .= "Phone: " . ($input['phone'] ?? '') . "\n";
+        $userMessage .= "Site Address: " . ($input['siteAddress'] ?? '') . "\n";
+        $userMessage .= "Trade Type: " . ($input['tradeType'] ?? '') . "\n";
+        $userMessage .= "Issue: " . ($input['issueDescription'] ?? '') . "\n\n";
+        $userMessage .= "Please call our hotline at 905-625-4401 for immediate assistance.\n\n";
+        $userMessage .= "Thank you,\nFacility Network Dispatch Team";
+
+        $mgClient->messages()->send($domain, [
+            'from'    => 'no-reply@deepak.com',
+            'to'      => $userTo,
+            'subject' => $userSubject,
+            'text'    => $userMessage
+        ]);
+    }
 
     echo json_encode(['clientSecret' => $paymentIntent->client_secret]);
 
