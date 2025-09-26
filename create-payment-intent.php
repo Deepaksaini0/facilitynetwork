@@ -1,26 +1,35 @@
-
 <?php
+use Mailgun\Mailgun;
+// -------------------------------------------
+// CORS Handling
+// -------------------------------------------
+$allowed_origins = [
+    "https://www.facilitynetwork.com",
+    "https://facility-network-v1.webflow.io"
+];
 
-// Allow your Webflow domain to access
-header("Access-Control-Allow-Origin: https://www.facilitynetwork.com/");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins)) {
+    header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
+    header("Access-Control-Allow-Methods: POST, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type");
+}
 
-// Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-require __DIR__ . 'vendor/autoload.php';
+// -------------------------------------------
+// Load Composer dependencies
+// -------------------------------------------
+require __DIR__ . '/vendor/autoload.php';
 
-\Stripe\Stripe::setApiKey('sk_test_51Re0MgIDzdAJW4x4OXQMUDXTFEoLMAgV1SPPwqP4VLuqEAoF6Kh52Bi0gkOQYtREEar4kEMxv5GXiS3JmqVAHsek003BblxRmL');
-
+\Stripe\Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
 header('Content-Type: application/json');
 
 $input = json_decode(file_get_contents("php://input"), true);
 
-// Validate and set amount dynamically
+// Validate amount
 $amount = isset($input['holdAmount']) && is_numeric($input['holdAmount']) ? intval($input['holdAmount'] * 100) : null;
 
 if (!$amount || $amount <= 0) {
@@ -29,12 +38,14 @@ if (!$amount || $amount <= 0) {
     exit();
 }
 
+// -------------------------------------------
+// Stripe PaymentIntent
+// -------------------------------------------
 try {
-    // Create a PaymentIntent with manual capture (authorize only)
     $paymentIntent = \Stripe\PaymentIntent::create([
-        'amount' => $amount, // Dynamic amount in cents
+        'amount' => $amount,
         'currency' => 'cad',
-        'capture_method' => 'manual', // Only authorize
+        'capture_method' => 'manual',
         'description' => 'Hotline Service Hold',
         'metadata' => [
             'First Name'      => $input['firstName'] ?? '',
@@ -51,15 +62,27 @@ try {
         ]
     ]);
 
-    // Optional: Send email notification
+    // -------------------------------------------
+    // Send Email via Mailgun
+    // -------------------------------------------
+    
+
+    $mgClient = Mailgun::create(getenv('MAILGUN_API_KEY'));
+    $domain   = getenv('MAILGUN_DOMAIN');
+
     $to = "deepak@imarkinfotech.com";
     $subject = "Emergency Service Request – " . ($input['firstName'] ?? '') . " " . ($input['lastName'] ?? '');
-    $message = "New hotline request with $" . ($input['holdAmount'] ?? 0) . " hold:\n\n";
+    $messageBody = "New hotline request with $" . ($input['holdAmount'] ?? 0) . " hold:\n\n";
     foreach ($input as $key => $val) {
-        $message .= ucfirst($key) . ": " . $val . "\n";
+        $messageBody .= ucfirst($key) . ": " . $val . "\n";
     }
-    $headers = "From: no-reply@clientsdevsite.com\r\n";
-    mail($to, $subject, $message, $headers);
+
+    $mgClient->messages()->send($domain, [
+        'from'    => 'no-reply@clientsdevsite.com',
+        'to'      => $to,
+        'subject' => $subject,
+        'text'    => $messageBody
+    ]);
 
     echo json_encode(['clientSecret' => $paymentIntent->client_secret]);
 
