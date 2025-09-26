@@ -1,5 +1,6 @@
 <?php
 use Mailgun\Mailgun;
+
 // -------------------------------------------
 // CORS Handling
 // -------------------------------------------
@@ -63,25 +64,27 @@ try {
     ]);
 
     // -------------------------------------------
-    // Send Email via Mailgun
+    // Send Email via Mailgun (HTML format)
     // -------------------------------------------
-    
-
     $mgClient = Mailgun::create(getenv('MAILGUN_API_KEY'));
     $domain   = getenv('MAILGUN_DOMAIN');
 
     $to = "deepak@imarkinfotech.com";
     $subject = "Emergency Service Request – " . ($input['firstName'] ?? '') . " " . ($input['lastName'] ?? '');
-    $messageBody = "New hotline request with $" . ($input['holdAmount'] ?? 0) . " hold:\n\n";
-    foreach ($input as $key => $val) {
-        $messageBody .= ucfirst($key) . ": " . $val . "\n";
-    }
+
+    // Replace placeholders in your HTML template
+    $htmlBody = file_get_contents(__DIR__ . '/email_template.html'); // save your HTML content in this file
+    $htmlBody = str_replace(
+        ['[First Name]', '[Trade Type]', '[Description or issue provided]', '[Site Address]'],
+        [$input['firstName'] ?? '', $input['tradeType'] ?? '', $input['issueDescription'] ?? '', $input['siteAddress'] ?? ''],
+        $htmlBody
+    );
 
     $mgClient->messages()->send($domain, [
-        'from'    => 'no-reply@deepak.com',
+        'from'    => 'no-reply@clientsdevsite.com',
         'to'      => $to,
         'subject' => $subject,
-        'text'    => $messageBody
+        'html'    => $htmlBody
     ]);
 
     echo json_encode(['clientSecret' => $paymentIntent->client_secret]);
