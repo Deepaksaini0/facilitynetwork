@@ -78,8 +78,7 @@ try {
     }
 
     $mgClient->messages()->send($domain, [
-        'from'    => 'no-reply@deepak.com
-',
+        'from'    => 'no-reply@deepak.com',
         'to'      => $to,
         'subject' => $subject,
         'text'    => $messageBody
