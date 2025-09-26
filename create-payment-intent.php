@@ -78,7 +78,7 @@ try {
     }
 
     $mgClient->messages()->send($domain, [
-        'from'    => 'website@mail.facilitynetwork.com',
+        'from'    => 'no-reply@facilitynetwork.com',
         'to'      => $to,
         'subject' => $subject,
         'text'    => $messageBody
