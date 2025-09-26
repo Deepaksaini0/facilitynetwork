@@ -64,7 +64,7 @@ try {
     foreach ($input as $key => $val) {
         $message .= ucfirst($key) . ": " . $val . "\n";
     }
-    $headers = "From: no-reply@clientsdevsite.com\r\n";
+    $headers = "From: no-reply@deepak.com\r\n";
     mail($to, $subject, $message, $headers);
 
     echo json_encode(['clientSecret' => $paymentIntent->client_secret]);
