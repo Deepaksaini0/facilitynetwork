@@ -169,8 +169,8 @@ try {
       <a href="https://www.facilitynetwork.com" style="font-size: 18px; color: #fff; text-decoration: none;">Facility Network</a>
     </p>
     <p style="margin:0;">
-      <a href="https://www.facilitynetwork.com/privacy-policy" style="color:#fff; text-decoration:none;">Privacy Policy</a> •
-      <a href="https://www.facilitynetwork.com/terms-of-service" style="color:#fff; text-decoration:none;">Terms of Service</a>
+      <a href="https://www.facilitynetwork.com/privacy-policy" style="color:#fff; text-decoration:none;" target="_blank" >Privacy Policy</a> •
+      <a href="https://www.facilitynetwork.com/terms-of-service" style="color:#fff; text-decoration:none;" target="_blank">Terms of Service</a>
     </p>
   </div>
 </div>
