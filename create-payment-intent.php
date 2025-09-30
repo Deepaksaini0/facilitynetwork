@@ -1,9 +1,20 @@
 <?php
 
-// Allow your Webflow domain to access
-header("Access-Control-Allow-Origin: https://www.facilitynetwork.com/");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+use SendGrid\Mail\Mail;
+
+// -------------------------------------------
+// CORS Handling
+// -------------------------------------------
+$allowed_origins = [
+    "https://www.facilitynetwork.com",
+    "https://facility-network-v1.webflow.io"
+];
+
+if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins)) {
+    header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
+    header("Access-Control-Allow-Methods: POST, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type");
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -47,24 +58,33 @@ try {
             'Site Address'    => $input['siteAddress'] ?? '',
             'Trade Type'      => $input['tradeType'] ?? '',
             'Issue'           => $input['issueDescription'] ?? '',
+            'Card Name'       => $input['cardName'] ?? '',
+            'Billing Postal'  => $input['billingPostal'] ?? '',
+            'Hotline File'    => $input['hotlinefile'] ?? ''
         ]
     ]);
 
     // -------------------------------------------
-    // Mailgun setup
+    // Send Email via SendGrid
     // -------------------------------------------
-    $mgClient = Mailgun::create(getenv('MAILGUN_API_KEY'));
-    $domain   = getenv('MAILGUN_DOMAIN');
-
-    // Optional: Send email notification
     $to = "deepak@imarkinfotech.com";
     $subject = "Emergency Service Request – " . ($input['firstName'] ?? '') . " " . ($input['lastName'] ?? '');
-    $message = "New hotline request with $" . ($input['holdAmount'] ?? 0) . " hold:\n\n";
+    $messageBody = "New hotline request with $" . ($input['holdAmount'] ?? 0) . " hold:\n\n";
     foreach ($input as $key => $val) {
-        $message .= ucfirst($key) . ": " . $val . "\n";
+        $messageBody .= ucfirst($key) . ": " . $val . "\n";
     }
-    $headers = "From: no-reply@clientsdevsite.com\r\n";
-    mail($to, $subject, $message, $headers);
+
+    $email = new Mail();
+    $email->setFrom("no-reply@clientsdevsite.com", "Facility Network");
+    $email->setSubject($subject);
+    $email->addTo($to, "Admin");
+    $email->addContent("text/plain", $messageBody);
+
+    $sendgrid = new \SendGrid(getenv('SENDGRID_API_KEY'));
+    $response = $sendgrid->send($email);
+
+    // Debug (optional):
+    // error_log("SendGrid Response: " . $response->statusCode());
 
     echo json_encode(['clientSecret' => $paymentIntent->client_secret]);
 
