@@ -99,6 +99,8 @@ try {
     // Prepare HTML template
    $userHtml = <<<HTML
 <body style="margin:0; padding:0; background-color:#f5f7fa; font-family: 'Instrument Sans', serif; color:#333333;">
+<link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
 .hotline-btn {
