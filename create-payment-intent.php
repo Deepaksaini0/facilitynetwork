@@ -81,7 +81,7 @@ try {
     $adminEmail = new Mail();
     $adminEmail->setFrom("website@mail.facilitynetwork.com", "Facility Network");
     $adminEmail->setSubject("Emergency Service Request – " . ($input['firstName'] ?? '') . " " . ($input['lastName'] ?? ''));
-    $adminEmail->addTo("website@mail.facilitynetwork.com", "Admin");
+    $adminEmail->addTo("emergency@facilitynetwork.com", "Admin");
     $adminEmail->addContent("text/plain", $messageBody);
     $adminEmail->addContent("text/html", $htmlContent);
 
